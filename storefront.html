@@ -1,0 +1,666 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>NeuralBrief Automation Pack — Build an AI News Business While You Sleep</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #060608;
+      --surface: #0e0e14;
+      --surface2: #16161f;
+      --border: #1f1f2e;
+      --accent: #7c6af7;
+      --accent2: #e879f9;
+      --text: #eaeaf5;
+      --muted: #5a5a7a;
+      --green: #34d399;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Syne', sans-serif;
+      overflow-x: hidden;
+    }
+
+    /* NOISE TEXTURE */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0.4;
+    }
+
+    /* GLOW ORBS */
+    .orb {
+      position: fixed;
+      border-radius: 50%;
+      filter: blur(120px);
+      pointer-events: none;
+      z-index: 0;
+    }
+    .orb-1 {
+      width: 500px; height: 500px;
+      background: rgba(124, 106, 247, 0.12);
+      top: -100px; left: -100px;
+    }
+    .orb-2 {
+      width: 400px; height: 400px;
+      background: rgba(232, 121, 249, 0.08);
+      bottom: 200px; right: -100px;
+    }
+
+    /* NAV */
+    nav {
+      position: relative;
+      z-index: 10;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 24px 60px;
+      border-bottom: 1px solid var(--border);
+      backdrop-filter: blur(10px);
+    }
+    .logo {
+      font-size: 1.2rem;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .nav-badge {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.7rem;
+      color: var(--green);
+      background: rgba(52, 211, 153, 0.1);
+      border: 1px solid rgba(52, 211, 153, 0.2);
+      padding: 6px 14px;
+      border-radius: 20px;
+      letter-spacing: 0.5px;
+    }
+
+    /* HERO */
+    .hero {
+      position: relative;
+      z-index: 1;
+      max-width: 860px;
+      margin: 0 auto;
+      padding: 100px 40px 80px;
+      text-align: center;
+    }
+
+    .hero-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-family: 'DM Mono', monospace;
+      font-size: 0.72rem;
+      color: var(--accent);
+      background: rgba(124, 106, 247, 0.1);
+      border: 1px solid rgba(124, 106, 247, 0.2);
+      padding: 8px 16px;
+      border-radius: 20px;
+      margin-bottom: 32px;
+      letter-spacing: 0.5px;
+      animation: fadeUp 0.6s ease both;
+    }
+    .hero-tag::before {
+      content: '';
+      width: 6px; height: 6px;
+      background: var(--accent);
+      border-radius: 50%;
+      animation: pulse 2s infinite;
+    }
+
+    h1 {
+      font-size: clamp(2.4rem, 6vw, 4rem);
+      font-weight: 800;
+      line-height: 1.05;
+      letter-spacing: -1.5px;
+      margin-bottom: 24px;
+      animation: fadeUp 0.6s ease 0.1s both;
+    }
+    h1 span {
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .hero-sub {
+      font-size: 1.1rem;
+      color: var(--muted);
+      line-height: 1.7;
+      max-width: 560px;
+      margin: 0 auto 48px;
+      font-weight: 400;
+      animation: fadeUp 0.6s ease 0.2s both;
+    }
+
+    .cta-group {
+      display: flex;
+      gap: 16px;
+      justify-content: center;
+      flex-wrap: wrap;
+      animation: fadeUp 0.6s ease 0.3s both;
+    }
+
+    .btn-primary {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      color: white;
+      padding: 16px 32px;
+      border-radius: 10px;
+      font-family: 'Syne', sans-serif;
+      font-weight: 700;
+      font-size: 1rem;
+      text-decoration: none;
+      transition: all 0.2s ease;
+      box-shadow: 0 0 40px rgba(124, 106, 247, 0.3);
+    }
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 0 60px rgba(124, 106, 247, 0.5);
+    }
+
+    .btn-secondary {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      background: transparent;
+      color: var(--text);
+      padding: 16px 32px;
+      border-radius: 10px;
+      font-family: 'Syne', sans-serif;
+      font-weight: 600;
+      font-size: 1rem;
+      text-decoration: none;
+      border: 1px solid var(--border);
+      transition: all 0.2s ease;
+    }
+    .btn-secondary:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    /* PRICE BANNER */
+    .price-banner {
+      position: relative;
+      z-index: 1;
+      max-width: 860px;
+      margin: 0 auto 80px;
+      padding: 0 40px;
+      display: flex;
+      justify-content: center;
+      gap: 40px;
+      flex-wrap: wrap;
+      animation: fadeUp 0.6s ease 0.4s both;
+    }
+    .stat {
+      text-align: center;
+    }
+    .stat-num {
+      font-size: 2rem;
+      font-weight: 800;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .stat-label {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.7rem;
+      color: var(--muted);
+      letter-spacing: 0.5px;
+      margin-top: 4px;
+    }
+
+    /* DIVIDER */
+    .divider {
+      width: 1px;
+      background: var(--border);
+      align-self: stretch;
+    }
+
+    /* WHAT YOU GET */
+    section {
+      position: relative;
+      z-index: 1;
+      max-width: 860px;
+      margin: 0 auto;
+      padding: 0 40px 80px;
+    }
+
+    .section-label {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.7rem;
+      color: var(--accent);
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      margin-bottom: 16px;
+    }
+    h2 {
+      font-size: 2rem;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      margin-bottom: 40px;
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 28px;
+      transition: border-color 0.2s ease, transform 0.2s ease;
+    }
+    .card:hover {
+      border-color: rgba(124, 106, 247, 0.3);
+      transform: translateY(-2px);
+    }
+    .card-icon {
+      font-size: 1.8rem;
+      margin-bottom: 14px;
+    }
+    .card h3 {
+      font-size: 1rem;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+    .card p {
+      font-size: 0.875rem;
+      color: var(--muted);
+      line-height: 1.6;
+      font-weight: 400;
+    }
+
+    /* HOW IT WORKS */
+    .steps {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+    }
+    .step {
+      display: flex;
+      gap: 24px;
+      align-items: flex-start;
+      padding: 28px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .step:last-child { border-bottom: none; }
+    .step-num {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.7rem;
+      color: var(--accent);
+      background: rgba(124, 106, 247, 0.1);
+      border: 1px solid rgba(124, 106, 247, 0.2);
+      width: 36px; height: 36px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      font-weight: 500;
+    }
+    .step-content h3 {
+      font-size: 1rem;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+    .step-content p {
+      font-size: 0.875rem;
+      color: var(--muted);
+      line-height: 1.6;
+      font-weight: 400;
+    }
+
+    /* FLOW DIAGRAM */
+    .flow {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 32px;
+      font-family: 'DM Mono', monospace;
+    }
+    .flow-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 12px;
+      flex-wrap: wrap;
+    }
+    .flow-node {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 8px 14px;
+      font-size: 0.75rem;
+      color: var(--text);
+      white-space: nowrap;
+    }
+    .flow-node.accent {
+      border-color: rgba(124, 106, 247, 0.4);
+      color: var(--accent);
+      background: rgba(124, 106, 247, 0.08);
+    }
+    .flow-arrow {
+      color: var(--muted);
+      font-size: 0.8rem;
+    }
+    .flow-label {
+      font-size: 0.65rem;
+      color: var(--muted);
+      margin-bottom: 4px;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+
+    /* PRICING */
+    .pricing-card {
+      background: var(--surface);
+      border: 1px solid rgba(124, 106, 247, 0.3);
+      border-radius: 20px;
+      padding: 48px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .pricing-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, var(--accent), var(--accent2));
+    }
+    .price {
+      font-size: 4rem;
+      font-weight: 800;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      line-height: 1;
+      margin-bottom: 4px;
+    }
+    .price-note {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.75rem;
+      color: var(--muted);
+      margin-bottom: 32px;
+    }
+    .checklist {
+      list-style: none;
+      text-align: left;
+      max-width: 360px;
+      margin: 0 auto 40px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+    .checklist li {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 0.925rem;
+      font-weight: 600;
+    }
+    .checklist li::before {
+      content: '✓';
+      color: var(--green);
+      font-weight: 800;
+      flex-shrink: 0;
+    }
+    .guarantee {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.7rem;
+      color: var(--muted);
+      margin-top: 20px;
+      letter-spacing: 0.5px;
+    }
+
+    /* FAQ */
+    .faq-item {
+      border-bottom: 1px solid var(--border);
+      padding: 24px 0;
+    }
+    .faq-item:last-child { border-bottom: none; }
+    .faq-q {
+      font-size: 0.975rem;
+      font-weight: 700;
+      margin-bottom: 10px;
+      color: var(--text);
+    }
+    .faq-a {
+      font-size: 0.875rem;
+      color: var(--muted);
+      line-height: 1.7;
+      font-weight: 400;
+    }
+
+    /* FOOTER */
+    footer {
+      position: relative;
+      z-index: 1;
+      text-align: center;
+      padding: 40px;
+      border-top: 1px solid var(--border);
+      font-family: 'DM Mono', monospace;
+      font-size: 0.7rem;
+      color: var(--muted);
+      letter-spacing: 0.5px;
+    }
+
+    /* ANIMATIONS */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.4; }
+    }
+
+    @media (max-width: 640px) {
+      nav { padding: 20px 24px; }
+      .hero { padding: 60px 24px 60px; }
+      section { padding: 0 24px 60px; }
+      .grid-2 { grid-template-columns: 1fr; }
+      .price-banner { padding: 0 24px; gap: 24px; }
+      .pricing-card { padding: 32px 24px; }
+      .divider { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+
+  <nav>
+    <div class="logo">⚡ NeuralBrief</div>
+    <div class="nav-badge">● INSTANT DOWNLOAD</div>
+  </nav>
+
+  <!-- HERO -->
+  <div class="hero">
+    <div class="hero-tag">n8n Automation Workflow Pack</div>
+    <h1>Run an AI news business.<br/><span>Zero effort required.</span></h1>
+    <p class="hero-sub">A plug-and-play n8n workflow that pulls today's top AI stories, summarizes them with Claude, sends a newsletter, and posts to Instagram — every single day, automatically.</p>
+    <div class="cta-group">
+      <a href="#pricing" class="btn-primary">Get Instant Access →</a>
+      <a href="#how-it-works" class="btn-secondary">See How It Works</a>
+    </div>
+  </div>
+
+  <!-- STATS -->
+  <div class="price-banner">
+    <div class="stat">
+      <div class="stat-num">5 min</div>
+      <div class="stat-label">Setup time</div>
+    </div>
+    <div class="divider"></div>
+    <div class="stat">
+      <div class="stat-num">$0</div>
+      <div class="stat-label">To run (after setup)</div>
+    </div>
+    <div class="divider"></div>
+    <div class="stat">
+      <div class="stat-num">24/7</div>
+      <div class="stat-label">Fully automated</div>
+    </div>
+    <div class="divider"></div>
+    <div class="stat">
+      <div class="stat-num">3</div>
+      <div class="stat-label">Revenue streams included</div>
+    </div>
+  </div>
+
+  <!-- WHAT YOU GET -->
+  <section>
+    <div class="section-label">// what's included</div>
+    <h2>Everything to launch today.</h2>
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-icon">⚙️</div>
+        <h3>n8n Workflow JSON</h3>
+        <p>The full automation file. Import it into n8n in one click and your entire operation is live — RSS feeds, AI summarization, newsletter, Instagram post.</p>
+      </div>
+      <div class="card">
+        <div class="card-icon">📖</div>
+        <h3>Step-by-Step Setup Guide</h3>
+        <p>A plain-English PDF walkthrough. Every API key, every setting, every connection explained. No coding knowledge needed.</p>
+      </div>
+      <div class="card">
+        <div class="card-icon">💰</div>
+        <h3>Monetization Playbook</h3>
+        <p>Exactly how to make money from this: affiliate links, newsletter sponsorships, and selling the workflow itself on Whop.</p>
+      </div>
+      <div class="card">
+        <div class="card-icon">📱</div>
+        <h3>Instagram Caption Template</h3>
+        <p>Auto-generated daily captions with hashtags and CTAs. The workflow posts for you — no manual work ever.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- HOW IT WORKS -->
+  <section id="how-it-works">
+    <div class="section-label">// how it works</div>
+    <h2>Set it up once.<br/>Let it run forever.</h2>
+
+    <div class="flow" style="margin-bottom: 40px;">
+      <div class="flow-label">Daily automated flow</div>
+      <div class="flow-row">
+        <div class="flow-node accent">⏰ 8am trigger</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-node">Pull RSS feeds</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-node">Filter AI stories</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-node accent">Claude summarizes</div>
+      </div>
+      <div class="flow-row">
+        <div class="flow-node accent">📧 Newsletter sent</div>
+        <div class="flow-arrow">+</div>
+        <div class="flow-node accent">📸 Instagram posted</div>
+        <div class="flow-arrow">+</div>
+        <div class="flow-node accent">📊 Logged to Sheets</div>
+      </div>
+    </div>
+
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">01</div>
+        <div class="step-content">
+          <h3>Download & import the workflow</h3>
+          <p>You get a .json file. Open n8n, click Import, drop the file in. Your entire automation appears on screen, pre-built.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">02</div>
+        <div class="step-content">
+          <h3>Add your API keys</h3>
+          <p>Paste in your Claude API key, Instagram access token, and email credentials. The setup guide walks you through getting each one — takes about 10 minutes total.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">03</div>
+        <div class="step-content">
+          <h3>Hit Activate</h3>
+          <p>Toggle the workflow on. Every morning at 8am it automatically pulls stories, writes summaries, sends your newsletter, and posts to Instagram. You do nothing.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">04</div>
+        <div class="step-content">
+          <h3>Start making money</h3>
+          <p>Add affiliate links to your newsletter, pitch sponsors once you hit 500 subscribers, or resell this workflow on Whop yourself.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PRICING -->
+  <section id="pricing">
+    <div class="section-label">// pricing</div>
+    <h2>One price. Everything included.</h2>
+    <div class="pricing-card">
+      <div class="price">$35</div>
+      <div class="price-note">one-time · instant download</div>
+      <ul class="checklist">
+        <li>n8n Workflow JSON (importable)</li>
+        <li>Step-by-Step Setup Guide PDF</li>
+        <li>Monetization Playbook</li>
+        <li>Instagram Caption Templates</li>
+        <li>Free updates forever</li>
+        <li>Community Discord access</li>
+      </ul>
+      <a href="#" class="btn-primary" style="font-size: 1.1rem; padding: 18px 48px;">Get NeuralBrief Now →</a>
+      <p class="guarantee">🔒 Instant delivery · No subscription · Yours forever</p>
+    </div>
+  </section>
+
+  <!-- FAQ -->
+  <section>
+    <div class="section-label">// faq</div>
+    <h2>Common questions.</h2>
+    <div class="faq-item">
+      <div class="faq-q">Do I need to know how to code?</div>
+      <div class="faq-a">No. n8n is a visual drag-and-drop tool. You import the file, paste in your API keys, and activate. The setup guide explains every single step in plain English.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q">Does it cost money to run?</div>
+      <div class="faq-a">n8n has a free self-hosted version. The Claude API costs roughly $0.001 per summary — running daily that's less than $0.50/month. You can also use n8n cloud for ~$20/mo if you don't want to self-host.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q">How long does setup actually take?</div>
+      <div class="faq-a">Most people are fully live in under 30 minutes. Importing the workflow is instant. Getting API keys takes the most time — the guide links you directly to every page you need.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q">Can I customize the topics or sources?</div>
+      <div class="faq-a">Yes. The workflow comes with AI/tech news pre-configured, but you can swap in any RSS feeds you want — finance, sports, crypto, whatever niche you're targeting.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q">What if I get stuck?</div>
+      <div class="faq-a">You get access to a Discord community included with your purchase. Drop a message and you'll get help fast.</div>
+    </div>
+  </section>
+
+  <footer>
+    © 2026 NeuralBrief · Built with AI · All rights reserved
+  </footer>
+
+</body>
+</html>
